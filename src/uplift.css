@@ -1,7 +1,8 @@
 /* ===== Layout shell ===== */
 .uplift-app {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: var(--gray-100);
   color: var(--gray-900);
 }
@@ -10,9 +11,12 @@
   position: relative;
   flex: 1;
   min-width: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* clip the decorative blob */
+  /* main is the scroll container so the topbar can stick; clips the blob */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .bg-blob {
@@ -316,8 +320,9 @@
 
 /* ===== Topbar ===== */
 .topbar {
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 5;
   background: var(--white);
   border-bottom: 1px solid var(--gray-200);
 }
@@ -1009,6 +1014,62 @@
   gap: 12px;
   width: 100%;
   flex-wrap: wrap;
+}
+
+/* ===== Interactions / hover states ===== */
+.btn,
+.icon-btn,
+.breadcrumb-btn,
+.menu-btn,
+.tab,
+.account-switch,
+.nav-item,
+.nav-subitem,
+.test-name {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-700-hover);
+}
+
+.btn-outline:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.btn-ghost:hover {
+  background: var(--gray-100);
+}
+
+.icon-btn:hover,
+.breadcrumb-btn:hover,
+.menu-btn:hover {
+  background: var(--gray-100);
+}
+
+.account-switch:hover {
+  background: var(--gray-50);
+}
+
+.account-switch.profile:hover {
+  background: var(--gray-50);
+}
+
+.tab:not(.is-active):hover {
+  color: var(--primary-700);
+}
+
+/* input affordances */
+.search-field:focus-within,
+.input-control:focus-within,
+.date-control:focus-within {
+  border-color: var(--primary-700);
+  box-shadow: 0 0 0 3px rgba(52, 171, 247, 0.15);
 }
 
 /* ===== Responsive ===== */

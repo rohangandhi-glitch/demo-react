@@ -6,12 +6,14 @@
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
   --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
   --gray-500: #6b7280;
   --gray-700: #36373b;
   --gray-900: #131416;
 
   --primary-200: #d6eefd;
   --primary-700: #34abf7;
+  --primary-700-hover: #1f9be8;
 
   --green-100: #def7ec;
   --green-500: #0e9f6e;
