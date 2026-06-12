@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "mcp__claude_ai_Figma__get_design_context",
+      "Bash(node -e ' *)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --window-size=1440,1000 --screenshot=/tmp/tab-test.png --virtual-time-budget=4000 http://localhost:5173/)",
+      "Bash(pkill -f vite)"
+    ]
+  }
+}

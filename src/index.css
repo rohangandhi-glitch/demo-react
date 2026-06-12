@@ -1,0 +1,60 @@
+:root {
+  /* Design tokens from the YouAppi Figma library */
+  --white: #ffffff;
+  --black: #000000;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-500: #6b7280;
+  --gray-700: #36373b;
+  --gray-900: #131416;
+
+  --primary-200: #d6eefd;
+  --primary-700: #34abf7;
+
+  --green-100: #def7ec;
+  --green-500: #0e9f6e;
+  --orange-100: #feecdc;
+  --orange-400: #ff8a4c;
+
+  --stat-blue-bg: #dbeafe;
+  --stat-blue-fg: #2563eb;
+  --stat-green-bg: #dcfce7;
+  --stat-green-fg: #16a34a;
+  --stat-purple-bg: #f3e8ff;
+  --stat-purple-fg: #9333ea;
+  --stat-orange-bg: #ffedd4;
+  --stat-orange-fg: #ea580c;
+
+  --shadow-card:
+    0px 1px 1.5px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0.1);
+
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-900);
+  background: var(--gray-100);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
