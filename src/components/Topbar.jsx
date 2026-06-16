@@ -1,6 +1,6 @@
 import { WandSparkles, ChevronDown, Moon, Menu } from './Icons'
 
-export default function Topbar({ onMenuClick }) {
+export default function Topbar({ onMenuClick, breadcrumb = 'Uplift Test' }) {
   return (
     <header className="topbar">
       <div className="topbar-inner">
@@ -19,7 +19,7 @@ export default function Topbar({ onMenuClick }) {
         </button>
         <span className="breadcrumb-sep">/</span>
         <button type="button" className="breadcrumb-btn">
-          <span>Uplift Test</span>
+          <span>{breadcrumb}</span>
           <ChevronDown size={16} className="muted-icon" />
         </button>
 

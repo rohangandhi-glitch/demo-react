@@ -16,9 +16,13 @@
   --primary-700-hover: #1f9be8;
 
   --green-100: #def7ec;
+  --green-400: #31c48d;
   --green-500: #0e9f6e;
   --orange-100: #feecdc;
   --orange-400: #ff8a4c;
+  --red-100: #fde8e8;
+  --red-700: #c81e1e;
+  --red-800: #9b1c1c;
 
   --stat-blue-bg: #dbeafe;
   --stat-blue-fg: #2563eb;

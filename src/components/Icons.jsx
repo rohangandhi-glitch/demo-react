@@ -151,6 +151,79 @@ export function Check({ size = 10, ...props }) {
   )
 }
 
+export function DotsVertical({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <circle cx="12" cy="5" r="1.4" />
+      <circle cx="12" cy="12" r="1.4" />
+      <circle cx="12" cy="19" r="1.4" />
+    </svg>
+  )
+}
+
+export function Pencil({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M4 20h4l10-10a2 2 0 0 0-4-4L4 16v4Z" />
+      <path d="M13.5 6.5 17.5 10.5" />
+    </svg>
+  )
+}
+
+export function Copy({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </svg>
+  )
+}
+
+export function Trash({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
+    </svg>
+  )
+}
+
+export function Eye({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+export function EyeOff({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.1A10.5 10.5 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.6 6.6A17 17 0 0 0 2 12s4 7 10 7a10 10 0 0 0 4-.8" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+    </svg>
+  )
+}
+
+export function Upload({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M12 16V4M7 9l5-5 5 5" />
+      <path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2" />
+    </svg>
+  )
+}
+
+export function Download({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M12 4v12M7 11l5 5 5-5" />
+      <path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2" />
+    </svg>
+  )
+}
+
 /* Stat tile icons */
 export function Flask({ size = 18, ...props }) {
   return (

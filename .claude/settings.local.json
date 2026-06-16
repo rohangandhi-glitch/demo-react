@@ -5,7 +5,17 @@
       "mcp__claude_ai_Figma__get_design_context",
       "Bash(node -e ' *)",
       "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --window-size=1440,1000 --screenshot=/tmp/tab-test.png --virtual-time-budget=4000 http://localhost:5173/)",
-      "Bash(pkill -f vite)"
+      "Bash(pkill -f vite)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(xattr -l src/assets/uplift/avatar-account.png)",
+      "Bash(xattr -rc src/assets)",
+      "Bash(xattr -rc dist)",
+      "mcp__claude_ai_Figma__get_screenshot",
+      "Bash(curl -s -o design-6737.png \"https://www.figma.com/api/mcp/asset/8151a91f-7c49-4b88-9790-c5bf289ef096\")",
+      "Bash(git commit -q -m ' *)",
+      "mcp__claude_ai_Figma__get_variable_defs"
     ]
   }
 }

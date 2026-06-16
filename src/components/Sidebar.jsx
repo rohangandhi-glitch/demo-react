@@ -34,15 +34,11 @@ const generalItems = [
   'Users',
 ]
 
-export default function Sidebar({ open = false, onClose }) {
+export default function Sidebar({ open = false, onClose, active, onNavigate }) {
   const [appsOpen, setAppsOpen] = useState(true)
   const [generalOpen, setGeneralOpen] = useState(true)
-  const [active, setActive] = useState('Uplift Test')
 
-  const select = (label) => {
-    setActive(label)
-    onClose?.()
-  }
+  const select = (label) => onNavigate?.(label)
 
   return (
     <aside className={`sidebar${open ? ' is-open' : ''}`}>
