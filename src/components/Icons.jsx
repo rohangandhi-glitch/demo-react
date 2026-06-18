@@ -206,6 +206,16 @@ export function EyeOff({ size = 16, ...props }) {
   )
 }
 
+export function FileCsv({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5" />
+      <path d="M8.5 13.5h2M8.5 16.5h4M13.5 13.5h2" />
+    </svg>
+  )
+}
+
 export function Upload({ size = 16, ...props }) {
   return (
     <svg {...base(size)} {...props}>

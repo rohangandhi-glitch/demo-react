@@ -2,10 +2,12 @@ import { useState } from 'react'
 import AppLayout from './components/AppLayout'
 import UpliftTestPage from './UpliftTestPage'
 import SspConfigPage from './SspConfigPage'
+import UaConfigPage from './UaConfigPage'
 
 // Sidebar labels that map to a real page.
 const PAGES = {
   'Uplift Test': UpliftTestPage,
+  'UA Config': UaConfigPage,
   'SSP Config': SspConfigPage,
 }
 
