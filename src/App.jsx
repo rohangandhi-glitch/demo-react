@@ -3,12 +3,14 @@ import AppLayout from './components/AppLayout'
 import UpliftTestPage from './UpliftTestPage'
 import SspConfigPage from './SspConfigPage'
 import UaConfigPage from './UaConfigPage'
+import RevenuePage from './RevenuePage'
 
 // Sidebar labels that map to a real page.
 const PAGES = {
   'Uplift Test': UpliftTestPage,
   'UA Config': UaConfigPage,
   'SSP Config': SspConfigPage,
+  Revenue: RevenuePage,
 }
 
 function App() {

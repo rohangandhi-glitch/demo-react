@@ -234,6 +234,41 @@ export function Download({ size = 16, ...props }) {
   )
 }
 
+export function CreditCard({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+    </svg>
+  )
+}
+
+export function DollarSign({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 3 5 3 5 1.1 5 3-2.2 3-5 3-5-1.1-5-3" />
+    </svg>
+  )
+}
+
+export function ClipboardList({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
+      <path d="M9 11h6M9 15h6" />
+    </svg>
+  )
+}
+
+export function Flag({ size = 16, ...props }) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+    </svg>
+  )
+}
+
 /* Stat tile icons */
 export function Flask({ size = 18, ...props }) {
   return (
