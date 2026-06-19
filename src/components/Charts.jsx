@@ -41,7 +41,7 @@ function niceTicks(lo, hi, count = 5) {
   return ticks
 }
 
-const Y_MIN_SPAN = 500 // closest you can zoom in (a 500-unit window)
+const Y_MIN_SPAN = 500 // closest Y zoom (a 500-unit window)
 
 export function LineChart({ trend, showComparison }) {
   const data = trend.xLabels.map((x, i) => ({
@@ -49,24 +49,56 @@ export function LineChart({ trend, showComparison }) {
     current: trend.current[i],
     previous: trend.previous[i],
   }))
+  const lastIdx = data.length - 1
 
   const [domain, setDomain] = useState([trend.yMin, trend.yMax])
+  const [xWin, setXWin] = useState([0, lastIdx]) // visible data-index window
   const [prevTrend, setPrevTrend] = useState(trend)
   const wrapRef = useRef(null)
+
+  const resetZoom = () => {
+    setDomain([trend.yMin, trend.yMax])
+    setXWin([0, data.length - 1])
+  }
 
   // Reset the zoom whenever the underlying series (date range) changes.
   if (prevTrend !== trend) {
     setPrevTrend(trend)
     setDomain([trend.yMin, trend.yMax])
+    setXWin([0, data.length - 1])
   }
 
-  // Wheel = zoom the Y-axis toward the value under the cursor.
+  // Wheel zooms toward the cursor: vertical → Y-axis, Shift/horizontal → X-axis.
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
     const onWheel = (e) => {
       e.preventDefault()
       const rect = el.getBoundingClientRect()
+      const zoomX = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)
+      const raw = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+      const factor = raw < 0 ? 0.85 : 1 / 0.85
+
+      if (zoomX) {
+        const plotLeft = 60 // approx: Y-axis width + left margin
+        const plotRight = rect.width - 24
+        const fx = Math.min(Math.max((e.clientX - rect.left - plotLeft) / (plotRight - plotLeft), 0), 1)
+        setXWin(([s, e2]) => {
+          const max = data.length - 1
+          const focal = s + fx * (e2 - s)
+          const span = Math.min(Math.max((e2 - s) * factor, 1), max)
+          let ns = focal - fx * span
+          let ne = focal + (1 - fx) * span
+          if (ns < 0) { ne -= ns; ns = 0 }
+          if (ne > max) { ns -= ne - max; ne = max }
+          ns = Math.max(0, Math.round(ns))
+          ne = Math.min(max, Math.round(ne))
+          if (ne - ns < 1) ne = Math.min(max, ns + 1)
+          return [ns, ne]
+        })
+        return
+      }
+
       const plotTop = 12
       const plotBottom = rect.height - 38 // approx: exclude x-axis + bottom margin
       const y = Math.min(Math.max(e.clientY - rect.top, plotTop), plotBottom)
@@ -74,37 +106,32 @@ export function LineChart({ trend, showComparison }) {
       const fullSpan = trend.yMax - trend.yMin
       setDomain(([lo, hi]) => {
         const focal = lo + fracFromBottom * (hi - lo)
-        const factor = e.deltaY < 0 ? 0.85 : 1 / 0.85
         const span = Math.min(Math.max((hi - lo) * factor, Y_MIN_SPAN), fullSpan)
         let nlo = focal - fracFromBottom * span
         let nhi = focal + (1 - fracFromBottom) * span
-        if (nlo < trend.yMin) {
-          nhi += trend.yMin - nlo
-          nlo = trend.yMin
-        }
-        if (nhi > trend.yMax) {
-          nlo -= nhi - trend.yMax
-          nhi = trend.yMax
-        }
+        if (nlo < trend.yMin) { nhi += trend.yMin - nlo; nlo = trend.yMin }
+        if (nhi > trend.yMax) { nlo -= nhi - trend.yMax; nhi = trend.yMax }
         return [Math.max(trend.yMin, nlo), Math.min(trend.yMax, nhi)]
       })
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [trend])
+  }, [trend, data.length])
 
   const ticks = useMemo(() => niceTicks(domain[0], domain[1], 5), [domain])
-  const zoomed = domain[0] !== trend.yMin || domain[1] !== trend.yMax
+  const view = data.slice(xWin[0], xWin[1] + 1)
+  const zoomed =
+    domain[0] !== trend.yMin || domain[1] !== trend.yMax || xWin[0] !== 0 || xWin[1] !== lastIdx
 
   return (
     <div
       className="trend-zoom"
       ref={wrapRef}
-      onDoubleClick={() => setDomain([trend.yMin, trend.yMax])}
-      title="Scroll to zoom the Y-axis · double-click to reset"
+      onDoubleClick={resetZoom}
+      title="Scroll to zoom the Y-axis · Shift+scroll (or trackpad horizontal) to zoom the X-axis · double-click to reset"
     >
       <ResponsiveContainer width="100%" height={320}>
-        <RLineChart data={data} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
+        <RLineChart data={view} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
           <CartesianGrid stroke={GRID} strokeDasharray="4 4" />
           <XAxis dataKey="x" tickLine={false} axisLine={false} tick={axisTick} dy={6} />
           <YAxis
@@ -144,7 +171,7 @@ export function LineChart({ trend, showComparison }) {
         </RLineChart>
       </ResponsiveContainer>
       {zoomed && (
-        <button type="button" className="zoom-reset" onClick={() => setDomain([trend.yMin, trend.yMax])}>
+        <button type="button" className="zoom-reset" onClick={resetZoom}>
           Reset zoom
         </button>
       )}
