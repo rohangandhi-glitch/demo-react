@@ -3,7 +3,7 @@ import { tests } from '../data/upliftTests'
 import TestsDataTable from './TestsDataTable'
 import { Columns, ChevronDown, Search, Plus } from './Icons'
 
-export default function TestPanel() {
+export default function TestPanel({ onNewTest }) {
   const [query, setQuery] = useState('')
 
   const rows = useMemo(() => {
@@ -42,7 +42,7 @@ export default function TestPanel() {
             />
           </div>
 
-          <button type="button" className="btn btn-primary">
+          <button type="button" className="btn btn-primary" onClick={onNewTest}>
             <Plus />
             <span>New Test</span>
           </button>

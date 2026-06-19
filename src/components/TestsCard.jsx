@@ -20,7 +20,7 @@ export default function TestsCard({ activeTab, onTabChange }) {
         ))}
       </div>
 
-      {activeTab === 'Test' && <TestPanel />}
+      {activeTab === 'Test' && <TestPanel onNewTest={() => onTabChange('Create Test')} />}
       {activeTab === 'Create Test' && <CreateTestPanel />}
       {activeTab === 'Reports' && <ReportsPanel />}
     </section>
