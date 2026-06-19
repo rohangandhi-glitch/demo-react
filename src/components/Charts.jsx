@@ -1,4 +1,5 @@
 // Charts built on Recharts (the product's standard charting library).
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ResponsiveContainer,
   LineChart as RLineChart,
@@ -27,6 +28,21 @@ const tooltipStyle = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
 }
 
+// "Nice" evenly-spaced ticks within [lo, hi] so a zoomed axis stays readable.
+function niceTicks(lo, hi, count = 5) {
+  const rawStep = (hi - lo) / (count - 1)
+  if (!isFinite(rawStep) || rawStep <= 0) return [lo, hi]
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)))
+  const norm = rawStep / mag
+  const niceNorm = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10
+  const step = niceNorm * mag
+  const ticks = []
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-6; v += step) ticks.push(Math.round(v))
+  return ticks
+}
+
+const Y_MIN_SPAN = 500 // closest you can zoom in (a 500-unit window)
+
 export function LineChart({ trend, showComparison }) {
   const data = trend.xLabels.map((x, i) => ({
     x,
@@ -34,47 +50,105 @@ export function LineChart({ trend, showComparison }) {
     previous: trend.previous[i],
   }))
 
+  const [domain, setDomain] = useState([trend.yMin, trend.yMax])
+  const [prevTrend, setPrevTrend] = useState(trend)
+  const wrapRef = useRef(null)
+
+  // Reset the zoom whenever the underlying series (date range) changes.
+  if (prevTrend !== trend) {
+    setPrevTrend(trend)
+    setDomain([trend.yMin, trend.yMax])
+  }
+
+  // Wheel = zoom the Y-axis toward the value under the cursor.
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const onWheel = (e) => {
+      e.preventDefault()
+      const rect = el.getBoundingClientRect()
+      const plotTop = 12
+      const plotBottom = rect.height - 38 // approx: exclude x-axis + bottom margin
+      const y = Math.min(Math.max(e.clientY - rect.top, plotTop), plotBottom)
+      const fracFromBottom = (plotBottom - y) / (plotBottom - plotTop)
+      const fullSpan = trend.yMax - trend.yMin
+      setDomain(([lo, hi]) => {
+        const focal = lo + fracFromBottom * (hi - lo)
+        const factor = e.deltaY < 0 ? 0.85 : 1 / 0.85
+        const span = Math.min(Math.max((hi - lo) * factor, Y_MIN_SPAN), fullSpan)
+        let nlo = focal - fracFromBottom * span
+        let nhi = focal + (1 - fracFromBottom) * span
+        if (nlo < trend.yMin) {
+          nhi += trend.yMin - nlo
+          nlo = trend.yMin
+        }
+        if (nhi > trend.yMax) {
+          nlo -= nhi - trend.yMax
+          nhi = trend.yMax
+        }
+        return [Math.max(trend.yMin, nlo), Math.min(trend.yMax, nhi)]
+      })
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [trend])
+
+  const ticks = useMemo(() => niceTicks(domain[0], domain[1], 5), [domain])
+  const zoomed = domain[0] !== trend.yMin || domain[1] !== trend.yMax
+
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <RLineChart data={data} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
-        <CartesianGrid stroke={GRID} strokeDasharray="4 4" />
-        <XAxis dataKey="x" tickLine={false} axisLine={false} tick={axisTick} dy={6} />
-        <YAxis
-          domain={[trend.yMin, trend.yMax]}
-          ticks={Array.from(
-            { length: (trend.yMax - trend.yMin) / trend.yStep + 1 },
-            (_, i) => trend.yMin + i * trend.yStep,
+    <div
+      className="trend-zoom"
+      ref={wrapRef}
+      onDoubleClick={() => setDomain([trend.yMin, trend.yMax])}
+      title="Scroll to zoom the Y-axis · double-click to reset"
+    >
+      <ResponsiveContainer width="100%" height={320}>
+        <RLineChart data={data} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
+          <CartesianGrid stroke={GRID} strokeDasharray="4 4" />
+          <XAxis dataKey="x" tickLine={false} axisLine={false} tick={axisTick} dy={6} />
+          <YAxis
+            domain={domain}
+            ticks={ticks}
+            allowDataOverflow
+            tickFormatter={(v) => `$${v}`}
+            tickLine={false}
+            axisLine={false}
+            tick={axisTick}
+            width={52}
+          />
+          <Tooltip contentStyle={tooltipStyle} formatter={(v) => `$${v}`} />
+          {showComparison && (
+            <Line
+              type="monotone"
+              dataKey="previous"
+              name="Previous Period"
+              stroke="#a9dbfb"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              dot={false}
+              activeDot={{ r: 4 }}
+              isAnimationActive={false}
+            />
           )}
-          tickFormatter={(v) => `$${v}`}
-          tickLine={false}
-          axisLine={false}
-          tick={axisTick}
-          width={48}
-        />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => `$${v}`} />
-        {showComparison && (
           <Line
             type="monotone"
-            dataKey="previous"
-            name="Previous Period"
-            stroke="#a9dbfb"
-            strokeWidth={2}
-            strokeDasharray="4 4"
+            dataKey="current"
+            name="Current Period"
+            stroke="#5dbcf9"
+            strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 4 }}
+            activeDot={{ r: 5 }}
+            isAnimationActive={false}
           />
-        )}
-        <Line
-          type="monotone"
-          dataKey="current"
-          name="Current Period"
-          stroke="#5dbcf9"
-          strokeWidth={2.5}
-          dot={false}
-          activeDot={{ r: 5 }}
-        />
-      </RLineChart>
-    </ResponsiveContainer>
+        </RLineChart>
+      </ResponsiveContainer>
+      {zoomed && (
+        <button type="button" className="zoom-reset" onClick={() => setDomain([trend.yMin, trend.yMax])}>
+          Reset zoom
+        </button>
+      )}
+    </div>
   )
 }
 
