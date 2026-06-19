@@ -73,10 +73,16 @@ export function buildTrend(range) {
   // Keep the hand-tuned curve for the default preset.
   if (range?.preset === 'Last 7 Days') return trend
 
-  const n = Math.max(2, Math.min(range?.days ?? 7, 31))
-  const start = range?.start ? new Date(range.start) : new Date(2025, 0, 3)
-  const xLabels = Array.from({ length: n }, (_, i) => fmtDate(new Date(start.getTime() + i * DAY_MS)))
-  const seed = (range?.days ?? 7) * 0.37 + 1
+  const startTs = range?.start ?? new Date(2025, 0, 3).getTime()
+  const endTs = range?.end ?? startTs + 6 * DAY_MS
+  const totalDays = Math.max(1, Math.round((endTs - startTs) / DAY_MS)) + 1
+  // One point per day, capped for readability; dates are spread across the
+  // full start→end span so the last label is always the selected end date.
+  const n = Math.max(2, Math.min(totalDays, 31))
+  const xLabels = Array.from({ length: n }, (_, i) =>
+    fmtDate(new Date(startTs + Math.round((i / (n - 1)) * (endTs - startTs)))),
+  )
+  const seed = totalDays * 0.13 + 1
   return {
     xLabels,
     yMin: 1000,
