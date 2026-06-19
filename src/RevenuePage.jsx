@@ -2,13 +2,13 @@ import { useState } from 'react'
 import Toggle from './components/Toggle'
 import FilterDropdown from './components/FilterDropdown'
 import DateRangePicker from './components/DateRangePicker'
+import ExportMenu from './components/ExportMenu'
 import { LineChart, HBarChart, VBarChart, PieChart } from './components/Charts'
 import {
   CreditCard,
   DollarSign,
   ClipboardList,
   Flag,
-  ChevronDown,
   Info,
 } from './components/Icons'
 import {
@@ -30,16 +30,7 @@ const KPI_ICONS = {
   flag: Flag,
 }
 
-function ExportButton() {
-  return (
-    <button type="button" className="btn btn-outline export-btn">
-      <span>Export</span>
-      <ChevronDown size={12} className="muted-icon" />
-    </button>
-  )
-}
-
-function ChartCard({ title, info, children }) {
+function ChartCard({ title, info, csvName, csvData, children }) {
   return (
     <section className="card chart-card">
       <div className="chart-card-head">
@@ -47,7 +38,7 @@ function ChartCard({ title, info, children }) {
           {title}
           {info && <Info size={14} className="muted-icon" />}
         </h3>
-        <ExportButton />
+        <ExportMenu name={csvName} data={csvData} />
       </div>
       <div className="chart-body">{children}</div>
     </section>
@@ -109,7 +100,14 @@ export default function RevenuePage() {
               <span>Comparison Period</span>
             </label>
             <DateRangePicker value={range} onChange={setRange} />
-            <ExportButton />
+            <ExportMenu
+              name="total-revenue-trend"
+              data={trend.xLabels.map((date, i) => ({
+                date,
+                current: trend.current[i],
+                previous: trend.previous[i],
+              }))}
+            />
           </div>
         </div>
         <div className="chart-body trend-body">
@@ -131,23 +129,23 @@ export default function RevenuePage() {
 
       {/* ===== Charts grid ===== */}
       <div className="charts-grid">
-        <ChartCard title="Top Countries" info>
+        <ChartCard title="Top Countries" info csvName="top-countries" csvData={topCountries.data}>
           <HBarChart chart={topCountries} color="#6875f5" />
         </ChartCard>
-        <ChartCard title="Top Platforms">
+        <ChartCard title="Top Platforms" csvName="top-platforms" csvData={topPlatforms}>
           <PieChart data={topPlatforms} />
         </ChartCard>
 
         <div className="grid-span-2">
-          <ChartCard title="Top Games">
+          <ChartCard title="Top Games" csvName="top-games" csvData={topGames.data}>
             <VBarChart chart={topGames} color="#85cdfa" />
           </ChartCard>
         </div>
 
-        <ChartCard title="Top Channels" info>
+        <ChartCard title="Top Channels" info csvName="top-channels" csvData={topChannels.data}>
           <HBarChart chart={topChannels} color="#5dbcf9" />
         </ChartCard>
-        <ChartCard title="Top Advertisers">
+        <ChartCard title="Top Advertisers" csvName="top-advertisers" csvData={topAdvertisers}>
           <PieChart data={topAdvertisers} />
         </ChartCard>
       </div>

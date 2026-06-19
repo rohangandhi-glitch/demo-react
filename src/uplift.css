@@ -1769,6 +1769,24 @@
   color: var(--gray-700);
 }
 
+.export-btn.is-open {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+/* Export dropdown menu: flat list, no row dividers */
+.export-menu {
+  min-width: 160px;
+}
+
+.export-menu .menu-item {
+  font-weight: 400;
+}
+
+.export-menu .menu-item:not(:last-child) {
+  border-bottom: none;
+}
+
 .trend-controls {
   display: flex;
   align-items: center;
