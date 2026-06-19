@@ -12,9 +12,17 @@
   flex: 1;
   min-width: 0;
   height: 100vh;
+  /* main holds the (non-scrolling) background blob and clips it */
+  overflow: hidden;
+}
+
+.main-scroll {
+  position: relative;
+  z-index: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  /* main is the scroll container so the topbar can stick; clips the blob */
+  /* the scroll container, so the topbar can stick and the blob stays fixed */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1580,32 +1588,9 @@
 
 /* ===== Revenue dashboard ===== */
 .revenue-analytics {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-/* The card body is white; the design only has a thin rainbow accent strip
-   along the very top edge of the card. */
-.revenue-analytics::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(
-    90deg,
-    #b56ef0 0%,
-    #5b8df0 16%,
-    #36c6f0 36%,
-    #74e2f6 50%,
-    #5ec6f2 64%,
-    #9d7af2 82%,
-    #e251e8 100%
-  );
 }
 
 .revenue-head {

@@ -30,8 +30,10 @@ export default function AppLayout({ active, onNavigate, children }) {
       )}
       <div className="main">
         <img className="bg-blob" src={blob} alt="" aria-hidden="true" />
-        <Topbar breadcrumb={active} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="content">{children}</main>
+        <div className="main-scroll">
+          <Topbar breadcrumb={active} onMenuClick={() => setSidebarOpen(true)} />
+          <main className="content">{children}</main>
+        </div>
       </div>
     </div>
   )
