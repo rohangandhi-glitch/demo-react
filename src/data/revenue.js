@@ -75,12 +75,13 @@ export function buildTrend(range) {
 
   const startTs = range?.start ?? new Date(2025, 0, 3).getTime()
   const endTs = range?.end ?? startTs + 6 * DAY_MS
-  const totalDays = Math.max(1, Math.round((endTs - startTs) / DAY_MS)) + 1
-  // One point per day, capped for readability; dates are spread across the
-  // full start→end span so the last label is always the selected end date.
-  const n = Math.max(2, Math.min(totalDays, 31))
+  const totalDays = Math.max(2, Math.round((endTs - startTs) / DAY_MS) + 1)
+  // One point per calendar day (capped at ~2 years) so zooming the X-axis
+  // reveals the in-between dates. Beyond the cap, points are spread evenly.
+  const n = Math.min(totalDays, 731)
+  const daily = n === totalDays
   const xLabels = Array.from({ length: n }, (_, i) =>
-    fmtDate(new Date(startTs + Math.round((i / (n - 1)) * (endTs - startTs)))),
+    fmtDate(new Date(daily ? startTs + i * DAY_MS : startTs + Math.round((i / (n - 1)) * (endTs - startTs)))),
   )
   const seed = totalDays * 0.13 + 1
   return {

@@ -133,7 +133,15 @@ export function LineChart({ trend, showComparison }) {
       <ResponsiveContainer width="100%" height={320}>
         <RLineChart data={view} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
           <CartesianGrid stroke={GRID} strokeDasharray="4 4" />
-          <XAxis dataKey="x" tickLine={false} axisLine={false} tick={axisTick} dy={6} />
+          <XAxis
+            dataKey="x"
+            tickLine={false}
+            axisLine={false}
+            tick={axisTick}
+            dy={6}
+            interval="preserveStartEnd"
+            minTickGap={28}
+          />
           <YAxis
             domain={domain}
             ticks={ticks}
