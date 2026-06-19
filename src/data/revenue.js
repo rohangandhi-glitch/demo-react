@@ -42,7 +42,7 @@ export const kpis = [
   },
 ]
 
-// Total Revenue Trend — 7 daily points.
+// Total Revenue Trend — designed 7-day series used for the default "Last 7 Days".
 export const trend = {
   xLabels: ['02.10.24', '03.10.24', '04.10.24', '05.10.24', '06.10.24', '07.10.24', '08.10.24'],
   yMin: 1000,
@@ -50,6 +50,80 @@ export const trend = {
   yStep: 1000,
   current: [1450, 2350, 1900, 4100, 1950, 2780, 2000],
   previous: [1350, 1300, 2350, 1800, 1950, 3550, 2050],
+}
+
+const DAY_MS = 86400000
+const pad = (n) => String(n).padStart(2, '0')
+const fmtDate = (d) => `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${String(d.getFullYear()).slice(2)}`
+
+// Deterministic pseudo-data so each range produces a distinct, stable curve.
+function series(n, seed) {
+  return Array.from({ length: n }, (_, i) => {
+    const t = n <= 1 ? 0 : i / (n - 1)
+    const v =
+      2350 +
+      1250 * Math.sin(t * Math.PI * 1.8 + seed) +
+      520 * Math.sin(t * Math.PI * 5 + seed * 1.7)
+    return Math.round(Math.max(1150, Math.min(4650, v)))
+  })
+}
+
+// Build the trend dataset for a selected range ({ preset, days, start, end }).
+export function buildTrend(range) {
+  // Keep the hand-tuned curve for the default preset.
+  if (range?.preset === 'Last 7 Days') return trend
+
+  const n = Math.max(2, Math.min(range?.days ?? 7, 31))
+  const start = range?.start ? new Date(range.start) : new Date(2025, 0, 3)
+  const xLabels = Array.from({ length: n }, (_, i) => fmtDate(new Date(start.getTime() + i * DAY_MS)))
+  const seed = (range?.days ?? 7) * 0.37 + 1
+  return {
+    xLabels,
+    yMin: 1000,
+    yMax: 5000,
+    yStep: 1000,
+    current: series(n, seed),
+    previous: series(n, seed + 1.6),
+  }
+}
+
+// "Today" anchor — fixed so the calendar matches the design (Dec 2024 / Jan 2025).
+export const TODAY = new Date(2025, 0, 9)
+
+export const DEFAULT_RANGE = {
+  label: 'Last 7 Days',
+  preset: 'Last 7 Days',
+  days: 7,
+  start: new Date(2025, 0, 3).getTime(),
+  end: new Date(2025, 0, 9).getTime(),
+}
+
+// Resolve a preset name to a concrete { label, preset, days, start, end } range.
+export function presetRange(preset) {
+  const end = new Date(TODAY)
+  let start = new Date(TODAY)
+  if (preset === 'Today') start = new Date(TODAY)
+  else if (preset === 'Yesterday') {
+    start = new Date(TODAY.getTime() - DAY_MS)
+    end.setTime(start.getTime())
+  } else if (preset === 'Last 7 Days') start = new Date(TODAY.getTime() - 6 * DAY_MS)
+  else if (preset === 'Last 30 Days') start = new Date(TODAY.getTime() - 29 * DAY_MS)
+  else if (preset === 'This Month') start = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1)
+  const days = Math.round((end.getTime() - start.getTime()) / DAY_MS) + 1
+  return { label: preset, preset, days, start: start.getTime(), end: end.getTime() }
+}
+
+export function customRange(startTs, endTs) {
+  const lo = Math.min(startTs, endTs)
+  const hi = Math.max(startTs, endTs)
+  const days = Math.round((hi - lo) / DAY_MS) + 1
+  return {
+    label: `${fmtDate(new Date(lo))} - ${fmtDate(new Date(hi))}`,
+    preset: null,
+    days,
+    start: lo,
+    end: hi,
+  }
 }
 
 // Horizontal bar chart — revenue by country ($K).

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Toggle from './components/Toggle'
 import FilterDropdown from './components/FilterDropdown'
 import DateRangePicker from './components/DateRangePicker'
@@ -13,7 +13,8 @@ import {
 } from './components/Icons'
 import {
   kpis,
-  trend,
+  buildTrend,
+  DEFAULT_RANGE,
   topCountries,
   topGames,
   topChannels,
@@ -49,7 +50,8 @@ export default function RevenuePage() {
   const [advertisers, setAdvertisers] = useState(advertiserOptions)
   const [apps, setApps] = useState(appOptions)
   const [comparison, setComparison] = useState(false)
-  const [range, setRange] = useState('Last 7 Days')
+  const [range, setRange] = useState(DEFAULT_RANGE)
+  const trendData = useMemo(() => buildTrend(range), [range])
 
   return (
     <>
@@ -102,16 +104,16 @@ export default function RevenuePage() {
             <DateRangePicker value={range} onChange={setRange} />
             <ExportMenu
               name="total-revenue-trend"
-              data={trend.xLabels.map((date, i) => ({
+              data={trendData.xLabels.map((date, i) => ({
                 date,
-                current: trend.current[i],
-                previous: trend.previous[i],
+                current: trendData.current[i],
+                previous: trendData.previous[i],
               }))}
             />
           </div>
         </div>
         <div className="chart-body trend-body">
-          <LineChart trend={trend} showComparison={comparison} />
+          <LineChart trend={trendData} showComparison={comparison} />
           <div className="pie-legend trend-legend">
             <span className="legend-item">
               <span className="legend-dot" style={{ background: '#5dbcf9' }} />

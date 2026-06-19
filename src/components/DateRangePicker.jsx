@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from './Icons'
-import { datePresets } from '../data/revenue'
+import { datePresets, presetRange, customRange } from '../data/revenue'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = [
@@ -12,19 +12,13 @@ const MONTHS = [
 function buildMonth(year, month) {
   const first = new Date(year, month, 1)
   const start = first.getDay()
-  const cells = []
-  for (let i = 0; i < 42; i++) {
+  return Array.from({ length: 42 }, (_, i) => {
     const d = new Date(year, month, 1 - start + i)
-    cells.push({ day: d.getDate(), inMonth: d.getMonth() === month, ts: d.getTime() })
-  }
-  return cells
+    return { day: d.getDate(), inMonth: d.getMonth() === month, ts: d.getTime() }
+  })
 }
 
-// The design's highlighted "Last 7 Days" window: Jan 3 – Jan 9, 2025.
-const RANGE_START = new Date(2025, 0, 3).getTime()
-const RANGE_END = new Date(2025, 0, 9).getTime()
-
-function MonthGrid({ year, month, onPrev, onNext }) {
+function MonthGrid({ year, month, lo, hi, onPick, onPrev, onNext }) {
   const cells = buildMonth(year, month)
   return (
     <div className="cal-month">
@@ -54,10 +48,11 @@ function MonthGrid({ year, month, onPrev, onNext }) {
           </span>
         ))}
         {cells.map((c, i) => {
-          const inRange = c.inMonth && c.ts >= RANGE_START && c.ts <= RANGE_END
-          const isEnd = c.inMonth && (c.ts === RANGE_START || c.ts === RANGE_END)
+          const inRange = c.ts >= lo && c.ts <= hi
+          const isEnd = c.ts === lo || c.ts === hi
           return (
-            <span
+            <button
+              type="button"
               key={i}
               className={[
                 'cal-cell',
@@ -67,9 +62,10 @@ function MonthGrid({ year, month, onPrev, onNext }) {
               ]
                 .filter(Boolean)
                 .join(' ')}
+              onClick={() => onPick(c.ts)}
             >
               {c.day}
-            </span>
+            </button>
           )
         })}
       </div>
@@ -79,7 +75,9 @@ function MonthGrid({ year, month, onPrev, onNext }) {
 
 export default function DateRangePicker({ value, onChange }) {
   const [open, setOpen] = useState(false)
-  const [base, setBase] = useState({ year: 2024, month: 11 }) // Dec 2024 + next
+  const [base, setBase] = useState({ year: 2024, month: 11 }) // Dec 2024 + Jan 2025
+  // in-progress custom selection: anchor day, and the live end (null until picked)
+  const [anchor, setAnchor] = useState(null)
   const ref = useRef(null)
 
   useEffect(() => {
@@ -87,8 +85,13 @@ export default function DateRangePicker({ value, onChange }) {
     const onDoc = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
     }
+    const onKey = (e) => e.key === 'Escape' && setOpen(false)
     document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   const shift = (delta) =>
@@ -97,12 +100,34 @@ export default function DateRangePicker({ value, onChange }) {
       return { year: d.getFullYear(), month: d.getMonth() }
     })
 
+  // Highlight either the in-progress anchor or the applied range.
+  const lo = anchor ?? value.start
+  const hi = anchor ?? value.end
+
+  const pickDay = (ts) => {
+    if (anchor == null) {
+      // first click → start a new selection
+      setAnchor(ts)
+    } else {
+      // second click → complete the custom range, apply, close
+      onChange(customRange(anchor, ts))
+      setAnchor(null)
+      setOpen(false)
+    }
+  }
+
+  const choosePreset = (p) => {
+    setAnchor(null)
+    onChange(presetRange(p))
+    setOpen(false)
+  }
+
   const next = new Date(base.year, base.month + 1, 1)
 
   return (
     <div className="daterange" ref={ref}>
       <button type="button" className="btn btn-outline" onClick={() => setOpen((v) => !v)}>
-        <span>{value}</span>
+        <span>{value.label}</span>
         <ChevronDown size={12} className="muted-icon" />
       </button>
 
@@ -113,19 +138,33 @@ export default function DateRangePicker({ value, onChange }) {
               <button
                 type="button"
                 key={p}
-                className={`cal-preset${value === p ? ' is-active' : ''}`}
-                onClick={() => {
-                  onChange?.(p)
-                  setOpen(false)
-                }}
+                className={`cal-preset${value.preset === p ? ' is-active' : ''}`}
+                onClick={() => choosePreset(p)}
               >
                 {p}
               </button>
             ))}
           </div>
-          <div className="cal-months">
-            <MonthGrid year={base.year} month={base.month} onPrev={() => shift(-1)} />
-            <MonthGrid year={next.getFullYear()} month={next.getMonth()} onNext={() => shift(1)} />
+          <div className="cal-pane">
+            {anchor != null && <p className="cal-hint">Select the range end date</p>}
+            <div className="cal-months">
+              <MonthGrid
+                year={base.year}
+                month={base.month}
+                lo={lo}
+                hi={hi}
+                onPick={pickDay}
+                onPrev={() => shift(-1)}
+              />
+              <MonthGrid
+                year={next.getFullYear()}
+                month={next.getMonth()}
+                lo={lo}
+                hi={hi}
+                onPick={pickDay}
+                onNext={() => shift(1)}
+              />
+            </div>
           </div>
         </div>
       )}
