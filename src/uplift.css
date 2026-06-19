@@ -1580,9 +1580,38 @@
 
 /* ===== Revenue dashboard ===== */
 .revenue-analytics {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* Rainbow banner across the top of the card, fading down into white. */
+.revenue-analytics::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 190px;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%),
+    linear-gradient(
+      90deg,
+      #5b8df0 0%,
+      #49a6f0 18%,
+      #36c6f0 38%,
+      #74e2f6 50%,
+      #5ec6f2 62%,
+      #9d7af2 80%,
+      #e251e8 100%
+    );
+}
+
+.revenue-head,
+.kpi-band {
+  position: relative;
+  z-index: 1;
 }
 
 .revenue-head {
@@ -1627,15 +1656,6 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  padding: 20px;
-  border-radius: 10px;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(232, 13, 246, 0.1) 0%,
-      rgba(52, 171, 247, 0.1) 50%,
-      rgba(51, 230, 247, 0.1) 100%
-    );
 }
 
 .kpi-card {
@@ -1697,9 +1717,16 @@
   font-size: 12px;
 }
 
-.kpi-up {
-  color: var(--green-500);
+.kpi-trend {
   font-weight: 600;
+}
+
+.kpi-trend.up {
+  color: var(--green-500);
+}
+
+.kpi-trend.down {
+  color: var(--red-500);
 }
 
 .kpi-note {
@@ -1752,11 +1779,14 @@
   width: 100%;
 }
 
-.chart {
-  display: block;
-  width: 100%;
-  height: auto;
+/* let pie leader labels spill past the plot area instead of being clipped */
+.chart-card .recharts-wrapper,
+.chart-card .recharts-surface {
   overflow: visible;
+}
+
+.recharts-default-tooltip {
+  outline: none;
 }
 
 .trend-legend {

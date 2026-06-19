@@ -64,7 +64,7 @@ export default function RevenuePage() {
   const [advertisers, setAdvertisers] = useState(advertiserOptions)
   const [apps, setApps] = useState(appOptions)
   const [filter, setFilter] = useState(null) // 'Advertiser' | 'Apps' | null
-  const [comparison, setComparison] = useState(true)
+  const [comparison, setComparison] = useState(false)
   const [range, setRange] = useState('Last 7 Days')
 
   return (
@@ -95,7 +95,9 @@ export default function RevenuePage() {
                   <span className="kpi-value">{k.value}</span>
                 </div>
                 <div className="kpi-delta">
-                  <span className="kpi-up">{k.delta} ↑</span>
+                  <span className={`kpi-trend ${k.dir}`}>
+                    {k.delta} {k.dir === 'up' ? '↑' : '↓'}
+                  </span>
                   <span className="kpi-note">{k.note}</span>
                 </div>
               </div>

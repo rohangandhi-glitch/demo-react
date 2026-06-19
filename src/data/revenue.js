@@ -5,39 +5,39 @@ export const kpis = [
     key: 'total',
     label: 'Total Revenue',
     icon: 'card',
-    tone: 'blue',
     value: '$4,51,000',
     delta: '10%',
+    dir: 'up',
     note: 'vs last 7 Days',
   },
   {
     key: 'game',
     label: 'Top Game Revenue',
     icon: 'dollar',
-    tone: 'green',
     name: 'Bubble Cash',
     value: '$1.57K',
     delta: '10%',
+    dir: 'down',
     note: 'vs last 7 Days',
   },
   {
     key: 'advertiser',
     label: 'Top Advertiser',
     icon: 'clipboard',
-    tone: 'purple',
     name: 'Papaya Gaming',
     value: '$5.2K',
     delta: '10%',
+    dir: 'down',
     note: 'vs last 7 Days',
   },
   {
     key: 'country',
     label: 'Top Country',
     icon: 'flag',
-    tone: 'orange',
     name: 'Japan',
     value: '$8.2K',
     delta: '10%',
+    dir: 'up',
     note: 'vs last 7 Days',
   },
 ]
@@ -59,29 +59,29 @@ export const topCountries = {
   max: 160,
   ticks: [0, 40, 80, 120, 160],
   data: [
-    { label: 'United States', value: 120 },
-    { label: 'Japan', value: 100 },
-    { label: 'Australia', value: 50 },
-    { label: 'Canada', value: 60 },
-    { label: 'France', value: 70 },
-    { label: 'Germany', value: 55 },
-    { label: 'United Kingdom', value: 95 },
-    { label: 'Others', value: 40 },
+    { label: 'United States', value: 145 },
+    { label: 'Japan', value: 118 },
+    { label: 'Australia', value: 35 },
+    { label: 'Canada', value: 22 },
+    { label: 'France', value: 48 },
+    { label: 'Germany', value: 88 },
+    { label: 'United Kingdom', value: 118 },
+    { label: 'Others', value: 48 },
   ],
 }
 
-// Vertical bar chart — revenue by game ($K).
+// Vertical bar chart — revenue by game ($).
 export const topGames = {
   unit: '$',
-  suffix: 'K',
-  max: 1000,
-  ticks: [0, 250, 500, 750, 1000],
+  suffix: '',
+  max: 10000,
+  ticks: [0, 2500, 5000, 7500, 10000],
   data: [
-    { label: 'Battle Royale Arena', value: 950 },
-    { label: 'Bubble Rush', value: 520 },
-    { label: 'Burger Dash', value: 430 },
-    { label: 'Casino Royal', value: 330 },
-    { label: 'Others', value: 300 },
+    { label: 'Battle Royale Arena', value: 8800 },
+    { label: 'Bubble Bash', value: 5000 },
+    { label: 'Burger Dash', value: 4000 },
+    { label: 'Casino Royal', value: 3200 },
+    { label: 'Others', value: 2000 },
   ],
 }
 
@@ -92,17 +92,17 @@ export const topChannels = {
   max: 160,
   ticks: [0, 40, 80, 120, 160],
   data: [
-    { label: 'Ironside', value: 150 },
-    { label: 'Fyber', value: 140 },
-    { label: 'Vungle', value: 60 },
-    { label: 'Applovin', value: 35 },
-    { label: 'Pubmatic', value: 75 },
-    { label: 'Others', value: 70 },
+    { label: 'Inmobi', value: 135 },
+    { label: 'Fyber', value: 120 },
+    { label: 'Vungle', value: 35 },
+    { label: 'Applovin', value: 15 },
+    { label: 'Pubmatic', value: 45 },
+    { label: 'Others', value: 45 },
   ],
 }
 
 // Pie palette (indigo / cyan / magenta / green) per the design.
-const PIE = ['#6875f5', '#5dbcf9', '#e74694', '#0e9f6e']
+const PIE = ['#6875f5', '#22c9e8', '#d61fdb', '#0e9f6e']
 
 export const topPlatforms = [
   { label: 'Android', value: 40, color: PIE[0] },
@@ -112,9 +112,9 @@ export const topPlatforms = [
 ]
 
 export const topAdvertisers = [
-  { label: 'GameZonz Entertainment', value: 40, color: PIE[0] },
-  { label: 'TechPton Games Inc', value: 30, color: PIE[2] },
-  { label: 'NextGen Apps Ltd', value: 20, color: PIE[1] },
+  { label: 'GameZoneEntertainment', value: 40, color: PIE[0] },
+  { label: 'TechFlow Games Inc', value: 30, color: PIE[1] },
+  { label: 'NextGen Apps Ltd', value: 20, color: PIE[2] },
   { label: 'Others', value: 10, color: PIE[3] },
 ]
 

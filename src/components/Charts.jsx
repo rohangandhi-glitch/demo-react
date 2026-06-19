@@ -1,196 +1,188 @@
-// Lightweight inline-SVG charts (no chart library — keeps the no-deps convention).
-// Each chart uses a fixed viewBox and scales to its container width.
+// Charts built on Recharts (the product's standard charting library).
+import {
+  ResponsiveContainer,
+  LineChart as RLineChart,
+  Line,
+  BarChart as RBarChart,
+  Bar,
+  PieChart as RPieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts'
 
-const AXIS = '#9ca3af' // gray-400/500 axis text
-const GRID = '#e5e7eb' // gray-200 gridlines
+const AXIS = '#9ca3af' // gray axis labels
+const CAT = '#6b7280' // category labels
+const GRID = '#e5e7eb' // gridlines
 
-function fmt(v, unit = '', suffix = '') {
-  return `${unit}${v}${suffix}`
-}
-
-/* Catmull-Rom → cubic bezier for a smooth line through the points. */
-function smoothPath(pts) {
-  if (pts.length < 2) return ''
-  let d = `M ${pts[0].x} ${pts[0].y}`
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] || p2
-    const c1x = p1.x + (p2.x - p0.x) / 6
-    const c1y = p1.y + (p2.y - p0.y) / 6
-    const c2x = p2.x - (p3.x - p1.x) / 6
-    const c2y = p2.y - (p3.y - p1.y) / 6
-    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
-  }
-  return d
+const axisTick = { fontSize: 11, fill: AXIS }
+const catTick = { fontSize: 11, fill: CAT }
+const tooltipStyle = {
+  border: '1px solid #e5e7eb',
+  borderRadius: 8,
+  fontSize: 12,
+  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
 }
 
 export function LineChart({ trend, showComparison }) {
-  const W = 780
-  const H = 240
-  const L = 46
-  const R = 12
-  const T = 12
-  const B = 30
-  const plotW = W - L - R
-  const plotH = H - T - B
-  const { xLabels, yMin, yMax, yStep, current, previous } = trend
-
-  const yTicks = []
-  for (let v = yMin; v <= yMax; v += yStep) yTicks.push(v)
-
-  const xAt = (i) => L + (current.length === 1 ? 0 : (plotW * i) / (current.length - 1))
-  const yAt = (v) => T + ((yMax - v) / (yMax - yMin)) * plotH
-
-  const toPts = (arr) => arr.map((v, i) => ({ x: xAt(i), y: yAt(v) }))
+  const data = trend.xLabels.map((x, i) => ({
+    x,
+    current: trend.current[i],
+    previous: trend.previous[i],
+  }))
 
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Total revenue trend">
-      {yTicks.map((v) => (
-        <g key={v}>
-          <line x1={L} y1={yAt(v)} x2={W - R} y2={yAt(v)} stroke={GRID} strokeWidth="1" />
-          <text x={L - 8} y={yAt(v) + 4} textAnchor="end" fontSize="11" fill={AXIS}>
-            ${v}
-          </text>
-        </g>
-      ))}
-      {showComparison && (
-        <path d={smoothPath(toPts(previous))} fill="none" stroke="#a9dbfb" strokeWidth="2" strokeDasharray="2 5" strokeLinecap="round" />
-      )}
-      <path d={smoothPath(toPts(current))} fill="none" stroke="#5dbcf9" strokeWidth="2.5" strokeLinecap="round" />
-      {xLabels.map((lbl, i) => (
-        <text key={lbl} x={xAt(i)} y={H - 8} textAnchor="middle" fontSize="11" fill={AXIS}>
-          {lbl}
-        </text>
-      ))}
-    </svg>
+    <ResponsiveContainer width="100%" height={320}>
+      <RLineChart data={data} margin={{ top: 12, right: 24, left: 8, bottom: 8 }}>
+        <CartesianGrid stroke={GRID} strokeDasharray="4 4" />
+        <XAxis dataKey="x" tickLine={false} axisLine={false} tick={axisTick} dy={6} />
+        <YAxis
+          domain={[trend.yMin, trend.yMax]}
+          ticks={Array.from(
+            { length: (trend.yMax - trend.yMin) / trend.yStep + 1 },
+            (_, i) => trend.yMin + i * trend.yStep,
+          )}
+          tickFormatter={(v) => `$${v}`}
+          tickLine={false}
+          axisLine={false}
+          tick={axisTick}
+          width={48}
+        />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v) => `$${v}`} />
+        {showComparison && (
+          <Line
+            type="monotone"
+            dataKey="previous"
+            name="Previous Period"
+            stroke="#a9dbfb"
+            strokeWidth={2}
+            strokeDasharray="4 4"
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+        )}
+        <Line
+          type="monotone"
+          dataKey="current"
+          name="Current Period"
+          stroke="#5dbcf9"
+          strokeWidth={2.5}
+          dot={false}
+          activeDot={{ r: 5 }}
+        />
+      </RLineChart>
+    </ResponsiveContainer>
   )
 }
 
 export function HBarChart({ chart, color = '#6875f5' }) {
-  const { data, max, ticks, unit, suffix } = chart
-  const W = 520
-  const rowH = 34
-  const gap = 10
-  const L = 96
-  const R = 16
-  const T = 6
-  const B = 26
-  const plotW = W - L - R
-  const H = T + data.length * rowH + B
-  const barH = rowH - gap
-  const xAt = (v) => L + (v / max) * plotW
-
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Bar chart">
-      {ticks.map((t) => (
-        <line key={t} x1={xAt(t)} y1={T} x2={xAt(t)} y2={T + data.length * rowH} stroke={GRID} strokeWidth="1" />
-      ))}
-      {data.map((d, i) => {
-        const y = T + i * rowH
-        return (
-          <g key={d.label}>
-            <text x={L - 8} y={y + barH / 2 + 4} textAnchor="end" fontSize="11" fill="#6b7280">
-              {d.label}
-            </text>
-            <rect x={L} y={y} width={Math.max(0, xAt(d.value) - L)} height={barH} rx="3" fill={color} />
-          </g>
-        )
-      })}
-      {ticks.map((t) => (
-        <text key={`t${t}`} x={xAt(t)} y={H - 8} textAnchor="middle" fontSize="11" fill={AXIS}>
-          {fmt(t, unit, suffix)}
-        </text>
-      ))}
-    </svg>
+    <ResponsiveContainer width="100%" height={chart.data.length * 42 + 36}>
+      <RBarChart data={chart.data} layout="vertical" margin={{ top: 6, right: 24, left: 8, bottom: 6 }}>
+        <CartesianGrid stroke={GRID} strokeDasharray="4 4" horizontal={false} />
+        <XAxis
+          type="number"
+          domain={[0, chart.max]}
+          ticks={chart.ticks}
+          tickFormatter={(v) => `${chart.unit}${v}${chart.suffix}`}
+          tickLine={false}
+          axisLine={false}
+          tick={axisTick}
+        />
+        <YAxis
+          type="category"
+          dataKey="label"
+          width={96}
+          tickLine={{ stroke: GRID }}
+          axisLine={false}
+          tick={catTick}
+        />
+        <Tooltip
+          cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+          contentStyle={tooltipStyle}
+          formatter={(v) => `${chart.unit}${v}${chart.suffix}`}
+        />
+        <Bar dataKey="value" fill={color} radius={[0, 3, 3, 0]} barSize={16} />
+      </RBarChart>
+    </ResponsiveContainer>
   )
 }
 
-export function VBarChart({ chart, color = '#85cdfa' }) {
-  const { data, max, ticks, unit, suffix } = chart
-  const W = 560
-  const H = 300
-  const L = 52
-  const R = 12
-  const T = 12
-  const B = 40
-  const plotW = W - L - R
-  const plotH = H - T - B
-  const slot = plotW / data.length
-  const barW = Math.min(64, slot * 0.5)
-  const yAt = (v) => T + ((max - v) / max) * plotH
-
+export function VBarChart({ chart, color = '#5dbcf9' }) {
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Bar chart">
-      {ticks.map((t) => (
-        <g key={t}>
-          <line x1={L} y1={yAt(t)} x2={W - R} y2={yAt(t)} stroke={GRID} strokeWidth="1" />
-          <text x={L - 8} y={yAt(t) + 4} textAnchor="end" fontSize="11" fill={AXIS}>
-            {fmt(t, unit, suffix)}
-          </text>
-        </g>
-      ))}
-      {data.map((d, i) => {
-        const cx = L + slot * i + slot / 2
-        const h = (d.value / max) * plotH
-        return (
-          <g key={d.label}>
-            <rect x={cx - barW / 2} y={T + plotH - h} width={barW} height={h} rx="3" fill={color} />
-            <text x={cx} y={H - 22} textAnchor="middle" fontSize="11" fill="#6b7280">
-              {d.label}
-            </text>
-          </g>
-        )
-      })}
-    </svg>
+    <ResponsiveContainer width="100%" height={320}>
+      <RBarChart data={chart.data} margin={{ top: 12, right: 12, left: 8, bottom: 8 }}>
+        <CartesianGrid stroke={GRID} strokeDasharray="4 4" vertical={false} />
+        <XAxis dataKey="label" interval={0} tickLine={false} axisLine={false} tick={catTick} dy={6} />
+        <YAxis
+          domain={[0, chart.max]}
+          ticks={chart.ticks}
+          tickFormatter={(v) => `${chart.unit}${v}${chart.suffix}`}
+          tickLine={false}
+          axisLine={false}
+          tick={axisTick}
+          width={56}
+        />
+        <Tooltip
+          cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+          contentStyle={tooltipStyle}
+          formatter={(v) => `${chart.unit}${v}${chart.suffix}`}
+        />
+        <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} barSize={90} />
+      </RBarChart>
+    </ResponsiveContainer>
+  )
+}
+
+const RAD = Math.PI / 180
+
+// Colored leader labels around the pie (e.g. "Android: $40k").
+function pieLabel({ cx, cy, midAngle, outerRadius, value, name, fill }) {
+  const r = outerRadius + 18
+  const x = cx + r * Math.cos(-midAngle * RAD)
+  const y = cy + r * Math.sin(-midAngle * RAD)
+  return (
+    <text
+      x={x}
+      y={y}
+      fill={fill}
+      fontSize={12}
+      fontWeight={500}
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+    >
+      {`${name}: $${value}k`}
+    </text>
   )
 }
 
 export function PieChart({ data }) {
-  // Wide viewBox so the radiating labels always fit (and scale with the chart).
-  const W = 600
-  const H = 280
-  const cx = 300
-  const cy = 140
-  const r = 96
-  const total = data.reduce((s, d) => s + d.value, 0)
-
-  // cumulative value before each slice (no mutation — keeps the linter happy)
-  const before = data.map((_, idx) => data.slice(0, idx).reduce((s, d) => s + d.value, 0))
-
-  const slices = data.map((d, idx) => {
-    const frac = d.value / total
-    const start = -Math.PI / 2 + (before[idx] / total) * Math.PI * 2
-    const end = start + frac * Math.PI * 2
-    const mid = (start + end) / 2
-    const large = end - start > Math.PI ? 1 : 0
-    const p = (a, rad) => [cx + Math.cos(a) * rad, cy + Math.sin(a) * rad]
-    const [x1, y1] = p(start, r)
-    const [x2, y2] = p(end, r)
-    const path = `M ${cx} ${cy} L ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z`
-    const [lx, ly] = p(mid, r + 18)
-    return { ...d, path, lx, ly, side: Math.cos(mid) >= 0 ? 'start' : 'end' }
-  })
-
   return (
-    <svg className="chart chart-pie" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Pie chart">
-      {slices.map((s) => (
-        <path key={s.label} d={s.path} fill={s.color} />
-      ))}
-      {slices.map((s) => (
-        <text
-          key={`l${s.label}`}
-          x={s.side === 'start' ? Math.min(s.lx, W - 6) : Math.max(s.lx, 6)}
-          y={s.ly}
-          textAnchor={s.side}
-          fontSize="11"
-          fontWeight="500"
-          fill={s.color}
+    <ResponsiveContainer width="100%" height={300}>
+      <RPieChart margin={{ top: 16, right: 8, bottom: 16, left: 8 }}>
+        <Pie
+          data={data}
+          dataKey="value"
+          nameKey="label"
+          cx="50%"
+          cy="50%"
+          outerRadius={76}
+          startAngle={90}
+          endAngle={-270}
+          stroke="none"
+          isAnimationActive={false}
+          label={pieLabel}
+          labelLine={false}
         >
-          {`${s.label}: $${s.value}k`}
-        </text>
-      ))}
-    </svg>
+          {data.map((d) => (
+            <Cell key={d.label} fill={d.color} />
+          ))}
+        </Pie>
+        <Tooltip contentStyle={tooltipStyle} formatter={(v, n) => [`$${v}k`, n]} />
+      </RPieChart>
+    </ResponsiveContainer>
   )
 }
