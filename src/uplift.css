@@ -1581,37 +1581,31 @@
 /* ===== Revenue dashboard ===== */
 .revenue-analytics {
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Rainbow banner across the top of the card, fading down into white. */
+/* The card body is white; the design only has a thin rainbow accent strip
+   along the very top edge of the card. */
 .revenue-analytics::before {
   content: '';
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 190px;
-  z-index: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%),
-    linear-gradient(
-      90deg,
-      #5b8df0 0%,
-      #49a6f0 18%,
-      #36c6f0 38%,
-      #74e2f6 50%,
-      #5ec6f2 62%,
-      #9d7af2 80%,
-      #e251e8 100%
-    );
-}
-
-.revenue-head,
-.kpi-band {
-  position: relative;
-  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(
+    90deg,
+    #b56ef0 0%,
+    #5b8df0 16%,
+    #36c6f0 36%,
+    #74e2f6 50%,
+    #5ec6f2 64%,
+    #9d7af2 82%,
+    #e251e8 100%
+  );
 }
 
 .revenue-head {
@@ -1629,6 +1623,10 @@
   flex-wrap: wrap;
 }
 
+.filter-dropdown {
+  position: relative;
+}
+
 .filter-pill {
   display: inline-flex;
   align-items: center;
@@ -1643,12 +1641,39 @@
   cursor: pointer;
 }
 
+.filter-pill:hover,
+.filter-pill.is-open {
+  border-color: var(--gray-400);
+}
+
 .filter-pill-label {
   color: var(--gray-500);
 }
 
 .filter-pill-value {
   font-weight: 500;
+}
+
+/* Anchored dropdown popover (Advertiser / Apps) */
+.filter-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+}
+
+.filter-empty {
+  font-size: 13px;
+  color: var(--gray-500);
 }
 
 /* KPI band */

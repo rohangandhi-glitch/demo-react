@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Toggle from './components/Toggle'
-import FilterModal from './components/FilterModal'
+import FilterDropdown from './components/FilterDropdown'
 import DateRangePicker from './components/DateRangePicker'
 import { LineChart, HBarChart, VBarChart, PieChart } from './components/Charts'
 import {
@@ -30,12 +30,6 @@ const KPI_ICONS = {
   flag: Flag,
 }
 
-function selLabel(sel, all) {
-  if (sel.length === 0 || sel.length === all.length) return 'All'
-  if (sel.length === 1) return sel[0]
-  return `${sel.length} selected`
-}
-
 function ExportButton() {
   return (
     <button type="button" className="btn btn-outline export-btn">
@@ -63,7 +57,6 @@ function ChartCard({ title, info, children }) {
 export default function RevenuePage() {
   const [advertisers, setAdvertisers] = useState(advertiserOptions)
   const [apps, setApps] = useState(appOptions)
-  const [filter, setFilter] = useState(null) // 'Advertiser' | 'Apps' | null
   const [comparison, setComparison] = useState(false)
   const [range, setRange] = useState('Last 7 Days')
 
@@ -74,8 +67,8 @@ export default function RevenuePage() {
         <div className="revenue-head">
           <h2 className="stats-title">Revenue Analytics</h2>
           <div className="revenue-filters">
-            <FilterPill label="Advertiser" value={selLabel(advertisers, advertiserOptions)} onClick={() => setFilter('Advertiser')} />
-            <FilterPill label="Apps" value={selLabel(apps, appOptions)} onClick={() => setFilter('Apps')} />
+            <FilterDropdown label="Advertiser" options={advertiserOptions} value={advertisers} onChange={setAdvertisers} />
+            <FilterDropdown label="Apps" options={appOptions} value={apps} onChange={setApps} />
           </div>
         </div>
 
@@ -158,32 +151,6 @@ export default function RevenuePage() {
           <PieChart data={topAdvertisers} />
         </ChartCard>
       </div>
-
-      {filter && (
-        <FilterModal
-          initialTab={filter}
-          advertiserOptions={advertiserOptions}
-          appOptions={appOptions}
-          advertisers={advertisers}
-          apps={apps}
-          onApply={({ advertisers: a, apps: p }) => {
-            setAdvertisers(a)
-            setApps(p)
-            setFilter(null)
-          }}
-          onClose={() => setFilter(null)}
-        />
-      )}
     </>
-  )
-}
-
-function FilterPill({ label, value, onClick }) {
-  return (
-    <button type="button" className="filter-pill" onClick={onClick}>
-      <span className="filter-pill-label">{label}</span>
-      <span className="filter-pill-value">{value}</span>
-      <ChevronDown size={12} className="muted-icon" />
-    </button>
   )
 }
